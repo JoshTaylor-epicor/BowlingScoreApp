@@ -8,20 +8,19 @@ namespace BowlingScoreApp
 {
     public class Bowl
     {
-        public enum Type
-        {
-            Regular,
-            FillerStrike,
-            FillerSpare
-        }
         public int Score;
-        public Type bowlType;
+        public bool isStrike;
 
         public Bowl()
         {
-            bowlType = Type.Regular;
             Console.WriteLine("Please Enter The Score For This Bowl:");
             Score = Convert.ToInt32(Console.ReadLine());
+            CheckForStrike();
+        }
+
+        public void CheckForStrike()
+        {
+            if (Score == 10) { isStrike = true; }
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using static BowlingScoreApp.Frame;
 
 
 namespace BowlingScoreApp
@@ -25,18 +26,79 @@ namespace BowlingScoreApp
 
         public BowlingScore()
         {
-            CurrentFrame = new Frame(0);
+            CurrentFrame = new Frame(1);
             PreviousFrame = CurrentFrame;
             Frames.Add(CurrentFrame.FrameNumber, CurrentFrame);
             State = GameState.GameStarted;
         }
         
-        public void RecordScore(Bowl currBowl)
+        public void RecordScore()
         {
-            //To Do
-
+            switch (CurrentFrame.CurrentState)
+            {
+                case Frame.FrameState.FrameInitialised:
+                    CurrentFrame.CurrentState = Frame.FrameState.FrameBowling;
+                    CheckPrev();
+                    break;
+                case Frame.FrameState.FrameBowling:
+                    Bowl local = new Bowl();
+                    CheckStrike(local);
+                    CheckPrev(local);
+                    CurrentFrame.NewBowl(local);
+                    break;
+                case Frame.FrameState.FrameFillerBowling:
+                    NextFrame();
+                    Bowl currBowl = new Bowl();
+                    CurrentFrame.NewBowl(currBowl);
+                    CheckPrev(currBowl);
+                    break;
+                case Frame.FrameState.FrameAwaitingScoring:
+                    CheckPrev();
+                    CurrentFrame.GetFrameScore();
+                    NextFrame();
+                    break;
+            }
         }
 
+
+        public void CheckStrike(Bowl currBowl)
+        {
+            if (currBowl.isStrike == true)
+            {
+                CurrentFrame.CurrentState = FrameState.FrameFillerBowling;
+                CurrentFrame.FrameFillers += 2;
+                Console.WriteLine("STRIKE");
+            }
+        }
+        public void CheckPrev(Bowl currBowl)
+        {
+            if(PreviousFrame != CurrentFrame)
+            {
+                switch (PreviousFrame.CurrentState)
+                {
+                    case Frame.FrameState.FrameFillerBowling:
+                        PreviousFrame.NewFillerBowl(currBowl);
+                        break;
+                    case Frame.FrameState.FrameAwaitingScoring:
+                        PreviousFrame.GetFrameScore();
+                        break;
+                }
+            }
+            
+        }
+
+        public void CheckPrev()
+        {
+            if (PreviousFrame != CurrentFrame)
+            {
+                if (PreviousFrame.CurrentState == Frame.FrameState.FrameAwaitingScoring || PreviousFrame.FrameFillers <= 0)
+                {
+                    PreviousFrame.CurrentState = Frame.FrameState.FrameAwaitingScoring;
+                    PreviousFrame.GetFrameScore();
+                }
+
+            }
+        }
         public void NextFrame()
         {
             // To Do
@@ -45,18 +107,16 @@ namespace BowlingScoreApp
                 State = GameState.GameFinished;
             } else
             {
-                CurrentFrame = new Frame(Frames.Count);
-                Frames.Add(Frames.Count, CurrentFrame);
+                PreviousFrame = CurrentFrame;
+                CurrentFrame = new Frame(Frames.Count + 1);
+                Frames.Add(Frames.Count + 1, CurrentFrame);
             }
         }
-        public int GetFrameCount()
+       
+        public void OutputScores()
         {
-            return Frames.Count;
-        }
-
-        public int GetScore()
-        {
-            return TotalScore + CurrentFrame.CalculateFrameScore();
+            // To Do, Output Scores In The Command Line
+            Console.WriteLine("Bowling Over! The Scores Are in:");
         }
     }
 }
