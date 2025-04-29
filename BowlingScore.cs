@@ -131,11 +131,13 @@ namespace BowlingScoreApp
             Console.WriteLine("Bowling Over! The Scores Are in:");
             foreach (KeyValuePair<int,Frame> kvp in Frames)
             {
+                TotalScore += kvp.Value.FrameScore;
                 Console.WriteLine("==============================");
                 Console.WriteLine("          Frame " + kvp.Value.FrameNumber);
                 Console.WriteLine("          Score: " + kvp.Value.FrameScore);
+                Console.WriteLine("          Net Score: " + TotalScore);
                 Console.WriteLine("==============================");
-                TotalScore += kvp.Value.FrameScore;
+                
             }
             Console.WriteLine("Total Player Score: " + TotalScore);
         }
