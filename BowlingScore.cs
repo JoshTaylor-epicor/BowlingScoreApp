@@ -33,6 +33,7 @@ namespace BowlingScoreApp
         }
         
         public void RecordScore()
+        
         {
             switch (CurrentFrame.CurrentState)
             {
@@ -42,15 +43,16 @@ namespace BowlingScoreApp
                     break;
                 case Frame.FrameState.FrameBowling:
                     Bowl local = new Bowl();
-                    CheckStrike(local);
                     CheckPrev(local);
+                    CheckStrike(local);
                     CurrentFrame.NewBowl(local);
                     break;
                 case Frame.FrameState.FrameFillerBowling:
                     NextFrame();
                     Bowl currBowl = new Bowl();
-                    CurrentFrame.NewBowl(currBowl);
                     CheckPrev(currBowl);
+                    CheckStrike(currBowl);
+                    CurrentFrame.NewBowl(currBowl);
                     break;
                 case Frame.FrameState.FrameAwaitingScoring:
                     CheckPrev();
@@ -77,7 +79,17 @@ namespace BowlingScoreApp
                 switch (PreviousFrame.CurrentState)
                 {
                     case Frame.FrameState.FrameFillerBowling:
-                        PreviousFrame.NewFillerBowl(currBowl);
+                        if (currBowl.isStrike == true)
+                        {
+                            PreviousFrame.NewFillerBowl(currBowl);
+                            PreviousFrame.CurrentState = FrameState.FrameAwaitingScoring;
+                            CheckPrev();
+                        } else
+                        {
+                            PreviousFrame.NewFillerBowl(currBowl);
+                            CheckPrev();
+                        }
+
                         break;
                     case Frame.FrameState.FrameAwaitingScoring:
                         PreviousFrame.GetFrameScore();
@@ -117,6 +129,15 @@ namespace BowlingScoreApp
         {
             // To Do, Output Scores In The Command Line
             Console.WriteLine("Bowling Over! The Scores Are in:");
+            foreach (KeyValuePair<int,Frame> kvp in Frames)
+            {
+                Console.WriteLine("==============================");
+                Console.WriteLine("          Frame " + kvp.Value.FrameNumber);
+                Console.WriteLine("          Score: " + kvp.Value.FrameScore);
+                Console.WriteLine("==============================");
+                TotalScore += kvp.Value.FrameScore;
+            }
+            Console.WriteLine("Total Player Score: " + TotalScore);
         }
     }
 }

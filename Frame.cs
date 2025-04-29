@@ -37,15 +37,8 @@ namespace BowlingScoreApp
         {
             // To Do
             CurrentState = FrameState.FrameScored;
-            Console.WriteLine("Score for Frame " + FrameNumber + " is " + FrameScore);
             return FrameScore;
         }
-
-        public int GetFrameBowls()
-        {
-            return FrameBowls.Count;
-        }
-
         public void NewBowl(Bowl bowl)
         {
             // To Do
