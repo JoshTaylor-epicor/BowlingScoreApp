@@ -129,8 +129,13 @@ namespace BowlingScoreApp
             if (Frames.Count >= 10 && Frames[Frames.Count].CurrentState == Frame.FrameState.FrameScored)
             {
                 State = GameState.GameFinished;
-            } else
-            { 
+            } else if (Frames.Count + 1 > 10)
+            {
+                PreviousFrame = CurrentFrame;
+                CurrentFrame = new Frame(Frames.Count + 1);
+            }
+            else
+            {
                 PreviousFrame = CurrentFrame;
                 CurrentFrame = new Frame(Frames.Count + 1);
                 Frames.Add(Frames.Count + 1, CurrentFrame);

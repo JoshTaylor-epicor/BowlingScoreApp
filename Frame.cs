@@ -29,7 +29,7 @@ namespace BowlingScoreApp
             FrameNumber = frameNum;
             FrameBowls = new Dictionary<int, Bowl>();
             Console.WriteLine("======================================");
-            Console.WriteLine("               Frame " + FrameNumber);
+            Console.WriteLine("               Frame " + (FrameNumber == 11 ? "Filler" : FrameNumber));
             Console.WriteLine("======================================");
         }
 
@@ -109,8 +109,10 @@ namespace BowlingScoreApp
 
         public void AddBowl(Bowl bowl)
         {
+            
             FrameBowls.Add(FrameBowls.Count, bowl);
             FrameScore = FrameScore + bowl.Score;
+            
         }
     }
 }
