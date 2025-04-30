@@ -10,20 +10,25 @@ using static BowlingScoreApp.Frame;
 
 namespace BowlingScoreApp
 {
+    /**
+     * Class to control the whole bowling game 
+     */
     public class BowlingScore
     {
+        // Different states of the game
         public enum GameState
         {
             GameStarted,
             GameFinished
-        }
+        } 
 
-        public Frame CurrentFrame;
-        public Frame PreviousFrame;
-        public int TotalScore;
-        public Dictionary<int, Frame> Frames = new Dictionary<int, Frame>();
-        public GameState State;
+        public Frame CurrentFrame; // The currently active frame
+        public Frame PreviousFrame; // The previously played frame
+        public int TotalScore; // Net score of all frames
+        public Dictionary<int, Frame> Frames = new Dictionary<int, Frame>(); // Storage of all frames
+        public GameState State; // Current state of the game
 
+        //Constructor
         public BowlingScore()
         {
             CurrentFrame = new Frame(1);
@@ -31,14 +36,15 @@ namespace BowlingScoreApp
             Frames.Add(CurrentFrame.FrameNumber, CurrentFrame);
             State = GameState.GameStarted;
         }
-        
+        /**
+         *  Function to record new score of a bowl and map it to correct frame 
+         */
         public void RecordScore()
-        
         {
             switch (CurrentFrame.CurrentState)
             {
                 case Frame.FrameState.FrameInitialised:
-                    CurrentFrame.CurrentState = Frame.FrameState.FrameBowling;
+                    CurrentFrame.CurrentState = Frame.FrameState.FrameBowling; //set frame status to bowling
                     CheckPrev();
                     break;
                 case Frame.FrameState.FrameBowling:
@@ -96,6 +102,12 @@ namespace BowlingScoreApp
                         break;
                 }
             }
+            // check in case of three active unresolved frames
+            if (Frames.Count > 2 && Frames[PreviousFrame.FrameNumber - 1].FrameFillers > 0)
+            {
+                Frames[PreviousFrame.FrameNumber - 1].NewFillerBowl(currBowl);
+                Frames[PreviousFrame.FrameNumber - 1].CurrentState = FrameState.FrameScored;
+            }
             
         }
 
@@ -118,7 +130,7 @@ namespace BowlingScoreApp
             {
                 State = GameState.GameFinished;
             } else
-            {
+            { 
                 PreviousFrame = CurrentFrame;
                 CurrentFrame = new Frame(Frames.Count + 1);
                 Frames.Add(Frames.Count + 1, CurrentFrame);
