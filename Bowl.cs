@@ -8,16 +8,19 @@ namespace BowlingScoreApp
 {
     public class Bowl
     {
-        public int Score;
-        public bool isStrike;
+        public int Score; // Score of the bowl
+        public bool isStrike; // Flag for whether bowl is strike or not
 
+        //Constructor
         public Bowl()
         {
             Console.WriteLine("Please Enter The Score For This Bowl:");
             Score = Convert.ToInt32(Console.ReadLine());
             CheckForStrike();
         }
-
+        /**
+         * Defines the isStrike flag
+         */
         public void CheckForStrike()
         {
             if (Score == 10) { isStrike = true; }

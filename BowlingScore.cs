@@ -68,7 +68,9 @@ namespace BowlingScoreApp
             }
         }
 
-
+        /**
+         * Checks whether bowl in question was a strike
+         */
         public void CheckStrike(Bowl currBowl)
         {
             if (currBowl.isStrike == true)
@@ -78,6 +80,9 @@ namespace BowlingScoreApp
                 Console.WriteLine("STRIKE");
             }
         }
+        /**
+         * Checks for previous unresolved frames+
+         */
         public void CheckPrev(Bowl currBowl)
         {
             if(PreviousFrame != CurrentFrame)
@@ -111,6 +116,9 @@ namespace BowlingScoreApp
             
         }
 
+        /**
+        * Overloaded Method for the purpose of checking for Frame state change of PreviousState
+        */
         public void CheckPrev()
         {
             if (PreviousFrame != CurrentFrame)
@@ -123,32 +131,37 @@ namespace BowlingScoreApp
 
             }
         }
+        /*
+         * Responsible for Creating a new game Frame
+         */
         public void NextFrame()
         {
             // To Do
-            if (Frames.Count >= 10 && Frames[Frames.Count].CurrentState == Frame.FrameState.FrameScored)
+            if (Frames.Count >= 10 && Frames[Frames.Count].CurrentState == Frame.FrameState.FrameScored) // Check for game end
             {
                 State = GameState.GameFinished;
-            } else if (Frames.Count + 1 > 10)
+            } else if (Frames.Count + 1 > 10) // Check for Filler Frame
             {
                 PreviousFrame = CurrentFrame;
                 CurrentFrame = new Frame(Frames.Count + 1);
             }
-            else
+            else //Create New Frame ELSE
             {
                 PreviousFrame = CurrentFrame;
                 CurrentFrame = new Frame(Frames.Count + 1);
                 Frames.Add(Frames.Count + 1, CurrentFrame);
             }
         }
-       
+       /**
+        * Outputs scores into the console of all frames
+        */
         public void OutputScores()
         {
             // To Do, Output Scores In The Command Line
             Console.WriteLine("Bowling Over! The Scores Are in:");
-            foreach (KeyValuePair<int,Frame> kvp in Frames)
+            foreach (KeyValuePair<int,Frame> kvp in Frames) //loop through all frames and output score, net score, frame number
             {
-                TotalScore += kvp.Value.FrameScore;
+                TotalScore += kvp.Value.FrameScore; // Add to net score each loop
                 Console.WriteLine("==============================");
                 Console.WriteLine("          Frame " + kvp.Value.FrameNumber);
                 Console.WriteLine("          Score: " + kvp.Value.FrameScore);
@@ -156,7 +169,7 @@ namespace BowlingScoreApp
                 Console.WriteLine("==============================");
                 
             }
-            Console.WriteLine("Total Player Score: " + TotalScore);
+            Console.WriteLine("Total Player Score: " + TotalScore); // Output total score at end
         }
     }
 }
