@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BowlingScoreApp.Worker;
 
 namespace BowlingScoreApp
 {
@@ -29,9 +24,6 @@ namespace BowlingScoreApp
             CurrentState = FrameState.FrameInitialised;
             FrameNumber = frameNum;
             FrameBowls = new Dictionary<int, Bowl>();
-            Console.WriteLine("======================================");
-            Console.WriteLine("               Frame " + (FrameNumber == 11 ? "Filler" : FrameNumber));
-            Console.WriteLine("======================================");
         }
 
         /**
@@ -39,7 +31,6 @@ namespace BowlingScoreApp
          */
         public int GetFrameScore()
         {
-            // To Do
             CurrentState = FrameState.FrameScored;
             return FrameScore;
         }
@@ -60,6 +51,7 @@ namespace BowlingScoreApp
                     {
                         AddBowl(bowl);
                         CurrentState = FrameState.FrameAwaitingScoring;
+                        GetFrameScore();
                     }
                     break;
                 case > 2 and <= 4: // if frame is between 2 and 4 bowls, frame is into its filler bowls
@@ -88,14 +80,15 @@ namespace BowlingScoreApp
             if (FrameBowls.Count == 2)
             {
                 // check for first two results spare
-                if (FrameBowls[0].Score + FrameBowls[1].Score == 10)
+                if (FrameBowls[0].BowlScore + FrameBowls[1].BowlScore == 10)
                 {
                     Console.WriteLine("SPARE!");
                     return true;
                 }
-            } else if (FrameBowls.Count + 1 == 2)
+            }
+            else if (FrameBowls.Count + 1 == 2)
             {
-                if (FrameBowls[0].Score + bowl.Score == 10)
+                if (FrameBowls[0].BowlScore + bowl.BowlScore == 10)
                 {
                     Console.WriteLine("SPARE!");
                     return true;
@@ -103,6 +96,8 @@ namespace BowlingScoreApp
             }
             return false;
         }
+
+        
         /**
          * Processes bowl for frame when its in Filler state
          */
@@ -112,10 +107,12 @@ namespace BowlingScoreApp
             {
                 AddBowl(bowl);
                 FrameFillers--;
-            } else
-            {
-                CurrentState = FrameState.FrameAwaitingScoring;
-            }
+                if (FrameFillers == 0)
+                {
+                    CurrentState = FrameState.FrameAwaitingScoring;
+                    GetFrameScore();
+                }
+            } 
         }
         /**
          * Function adds new bowl to bowl dictionary and adds to the FrameScore
@@ -123,7 +120,7 @@ namespace BowlingScoreApp
         public void AddBowl(Bowl bowl)
         {
             FrameBowls.Add(FrameBowls.Count, bowl);
-            FrameScore = FrameScore + bowl.Score;    
+            FrameScore = FrameScore + bowl.BowlScore;    
         }
     }
 }

@@ -1,11 +1,21 @@
 ﻿using BowlingScoreApp;
+using BowlingScoreApp.Scoring;
+using BowlingScoreApp.Output;
+using BowlingScoreApp.Input;
+using BowlingScoreApp.Worker;
+using Autofac;
 
-Console.WriteLine("Welcome To Bowl Scorer!");
+var builder = new ContainerBuilder();
 
-BowlingScore BowlingGame = new();
-
-while (BowlingGame.State != BowlingScore.GameState.GameFinished)
+//register interfaces
+builder.RegisterType<Calculator>().As<ICalculator>();
+builder.RegisterType<GameOutput>().As<IOutput>();
+builder.RegisterType<BowlInput>().As<IInput>();
+builder.RegisterType<GameWorker>().As<IWorker>();
+builder.RegisterType<BowlingGame>().As<IBowlingGame>();
+var container = builder.Build();
+using (var scope = container.BeginLifetimeScope())
 {
-    BowlingGame.RecordScore();
+    var game = scope.Resolve<IBowlingGame>();
+    game.StartGame();
 }
-BowlingGame.OutputScores();
