@@ -10,6 +10,5 @@ namespace BowlingScoreApp
     {
         void StartGame();
         void Roll();
-        int GetScore();
     }
 }

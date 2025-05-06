@@ -2,7 +2,6 @@
 using BowlingScoreApp.Input;
 using BowlingScoreApp.Output;
 using BowlingScoreApp.Scoring;
-using BowlingScoreApp.Worker;
 using static BowlingScoreApp.Frame;
 
 namespace BowlingScoreApp
@@ -12,135 +11,73 @@ namespace BowlingScoreApp
         private readonly ICalculator _calculator;
         private readonly IInput _gameInput;
         private readonly IOutput _gameOutput;
-        private readonly IWorker _gameWorker;
-        private int _prevFrameIndex;
         private int _currFrameIndex;
-        private Dictionary<int, Frame> _frames;
-        private bool _threeActive;
+        public Dictionary<int, Frame> _frames;
 
 
-        public BowlingGame(ICalculator calculator, IInput input, IOutput output, IWorker GameWorker)
+        public BowlingGame(ICalculator calculator, IInput input, IOutput output)
         {
             _calculator = calculator;
             _gameInput = input;
             _gameOutput = output;
-            _gameWorker = GameWorker;
-            _prevFrameIndex = 1;
             _currFrameIndex = 1;
-            _threeActive = false;
             _frames = new Dictionary<int, Frame>();
         }
         public void StartGame() 
         {
             _gameOutput.OutputGreeting();
 
-            //Create our 10 frames for the game
+            //Create our 11 frames for the game
             GenerateFrames();
-            while (_frames[_frames.Count - 1].CurrentState != Frame.FrameState.FrameScored) { Roll(); };
+            //Get all the bowls for each frame
+            for (int i=1; i<_frames.Count + 1;i++) 
+            {
+                if (i < _frames.Count)
+                {
+                    Roll();
+                    continue;
+                } 
+                if (_frames[_frames.Count-1].CheckForSpare() == true || _frames[_frames.Count-1].CheckForStrike() == true)
+                {
+                    Roll();
+                }
+            }
+            ;
+            // Calculate Score for each frame
+            for (int i=1; i<_frames.Count;i++)
+            {
+                _frames[i].CheckForSpare();
+                _frames[i].CheckForStrike();
+                _calculator.CalculateScore(_frames[i], _frames);
+            }
+            //Output information for all frames
             _gameOutput.OutputOverall(_frames);
-            
-        }
-       public int GetScore()
-        {
-            return _calculator.CalculateScore(_frames);
         }
         public void Roll() 
         {
-            if (_prevFrameIndex != _currFrameIndex)
+            _gameOutput.OutputUpdate(_frames[_currFrameIndex]);
+            _frames[_currFrameIndex].FirstBowl = new Bowl(_gameInput.GetInput());
+            if (_frames[_currFrameIndex].FirstBowl.isStrike == false)
             {
-                if (_gameWorker.CheckStates(_frames[_prevFrameIndex]) == true && _gameWorker.CheckStates(_frames[_currFrameIndex]) == true)
-                {
-                    Bowl _currentBowl = new Bowl(_gameInput.GetInput());
-                    if (_threeActive == true)
-                    {
-                        _gameWorker.ProcessBowl(_frames[_prevFrameIndex - 1], _currentBowl);
-                    }
-                    if (_gameWorker.CheckStrike(_frames[_currFrameIndex], _currentBowl) == true) 
-                    {
-                        _gameWorker.ProcessBowl(_frames[_prevFrameIndex], _currentBowl);
-                        _gameWorker.ProcessBowl(_frames[_currFrameIndex], _currentBowl);
-                        _frames[_currFrameIndex].CurrentState = FrameState.FrameFillerBowling;
-                        NextFrame();
-                    } else
-                    {
-                        _gameWorker.ProcessBowl(_frames[_prevFrameIndex], _currentBowl);
-                        _gameWorker.ProcessBowl(_frames[_currFrameIndex], _currentBowl);
-                    }
-                    _threeActive = _gameWorker.CheckThreeActive(_frames[_prevFrameIndex - 1], _currFrameIndex);
-                } else if (_gameWorker.CheckStates(_frames[_prevFrameIndex]) == true)
-                {
-                    Bowl _currentBowl = new Bowl(_gameInput.GetInput());
-                    _gameWorker.ProcessBowl(_frames[_prevFrameIndex], _currentBowl);
-                } else if (_gameWorker.CheckStates(_frames[_currFrameIndex]) == true)
-                {
-                    if (_frames[_currFrameIndex].CurrentState == FrameState.FrameFillerBowling)
-                    {
-                        NextFrame();
-                    }
-                    else
-                    {
-                        Bowl _currentBowl = new Bowl(_gameInput.GetInput());
-                        if (_gameWorker.CheckStrike(_frames[_currFrameIndex], _currentBowl) == true) 
-                        { 
-                            _gameWorker.ProcessBowl(_frames[_currFrameIndex], _currentBowl); 
-                            _frames[_currFrameIndex].CurrentState = FrameState.FrameFillerBowling;
-                            NextFrame(); 
-                        } else
-                        {
-                            _gameWorker.ProcessBowl(_frames[_currFrameIndex], _currentBowl);
-                        }
-                        
-                    }
-                       
-                } else
-                {
-                    NextFrame();
-                }
-            } else
+                _frames[_currFrameIndex].SecondBowl = new Bowl(_gameInput.GetInput());
+                _frames[_currFrameIndex].StrikeOverflow = true;
+            } else if (_frames[_currFrameIndex].SecondBowl.isStrike == true)
             {
-                if (_gameWorker.CheckStates(_frames[_currFrameIndex]) == true)
-                {
-                    Bowl _currentBowl = new Bowl(_gameInput.GetInput());
-                    if (_gameWorker.CheckStrike(_frames[_currFrameIndex], _currentBowl) == true)
-                    {
-                        _gameWorker.ProcessBowl(_frames[_currFrameIndex], _currentBowl);
-                        _frames[_currFrameIndex].CurrentState = FrameState.FrameFillerBowling;
-                        NextFrame();
-                    }
-                    else
-                    {
-                        _gameWorker.ProcessBowl(_frames[_currFrameIndex], _currentBowl);
-                        if (_frames[_currFrameIndex].CurrentState == FrameState.FrameFillerBowling)
-                        {
-                            NextFrame();
-                        }
-                    }
-                } else
-                {
-                    NextFrame();
-                }
+                _frames[_currFrameIndex].StrikeOverflow = true;
+            } else if (_frames[_currFrameIndex].FirstBowl.isStrike == true && _frames[_currFrameIndex].FrameNumber == 11)
+            {
+                _frames[_currFrameIndex].SecondBowl = new Bowl(_gameInput.GetInput());
             }
-           
+            _currFrameIndex++;
         }
 
-        public void NextFrame()
-        {
-            if (_currFrameIndex < 11)
-            {
-                _prevFrameIndex = _currFrameIndex;
-                _currFrameIndex++;
-                _frames[_currFrameIndex].CurrentState = FrameState.FrameBowling;
-                _gameOutput.OutputUpdate(_frames[_currFrameIndex]);
-            }
-        }
         public void GenerateFrames()
         {
             for (int i = 1; i < 12; i++)
             {
                 _frames.Add(i, new Frame(i));
             }
-            _gameOutput.OutputUpdate(_frames[_currFrameIndex]);
-            _frames[_currFrameIndex].CurrentState = FrameState.FrameBowling;
         }
     }
+
 }

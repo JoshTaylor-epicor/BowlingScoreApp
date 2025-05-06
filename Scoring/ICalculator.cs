@@ -8,6 +8,6 @@ namespace BowlingScoreApp.Scoring
 {
     public interface ICalculator
     {
-        int CalculateScore(Dictionary<int, Frame> Frames);
+        int CalculateScore(Frame Frame, Dictionary<int, Frame> Frames);
     }
 }
