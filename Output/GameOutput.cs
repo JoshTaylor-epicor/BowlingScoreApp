@@ -16,8 +16,6 @@ namespace BowlingScoreApp.Output
             Console.WriteLine("               Frame " + (Frame.FrameNumber == 11 ? "Filler" : Frame.FrameNumber));
             Console.WriteLine("======================================");
         }
-
-        public void OutputOverall(int Score) => Console.WriteLine("               Overall Net Score: " + Score);
      
         public void OutputOverall(Dictionary<int, Frame> Frames)
         {

@@ -64,20 +64,6 @@ namespace BowlingScoreApp.Worker
                 return true;
             }
             return false;
-        }
-
-        public bool CheckForSpare(Frame Frame)
-        {
-            if (Frame.FrameBowls.Count == 2)
-            {
-                // check for first two results spare
-                if (Frame.FrameBowls[0].BowlScore + Frame.FrameBowls[1].BowlScore == 10)
-                {
-                    Console.WriteLine("SPARE!");
-                    return true;
-                }
-            }
-            return false;
-        }        
+        }  
     }
 }
